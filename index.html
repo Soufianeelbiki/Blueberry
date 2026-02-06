@@ -1,701 +1,2795 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MY DEAR</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>🧩 Quick Puzzle</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Pinyon+Script&family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <style>
-    :root{
-      --beige:#f3eadc;
-      --beige2:#efe3d2;
-      --paper:#ffffff;
-      --ink:#1b1b1b;
-      --muted:#6b6258;
-      --pink:#ff3b7a;
-      --shadow: 0 18px 60px rgba(0,0,0,0.18);
-      --shadow2: 0 10px 26px rgba(0,0,0,0.14);
-      --radius: 22px;
-    }
+    <style>
+      :root {
+        --bg-dark: #0a0a0f;
+        --bg-game: linear-gradient(
+          135deg,
+          #1a1a2e 0%,
+          #16213e 50%,
+          #0f3460 100%
+        );
+        --bg-love: linear-gradient(
+          135deg,
+          #0f0c29 0%,
+          #1a1025 50%,
+          #24243e 100%
+        );
+        --pink: #ff6b9d;
+        --pink-light: #ff8fb8;
+        --pink-glow: #ff4081;
+        --purple: #c56cf0;
+        --purple-light: #d98fff;
+        --gold: #ffd700;
+        --cyan: #00d9ff;
+        --white: #ffffff;
+        --text-soft: rgba(255, 255, 255, 0.75);
+        --text-muted: rgba(255, 255, 255, 0.4);
+        --glass: rgba(255, 255, 255, 0.08);
+        --glass-strong: rgba(255, 255, 255, 0.12);
+        --glass-border: rgba(255, 255, 255, 0.15);
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
 
-    *{ box-sizing:border-box; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      background: radial-gradient(900px 600px at 50% 15%, var(--beige), var(--beige2));
-      overflow:hidden;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--ink);
-    }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
 
-    .stage{
-      height:100%;
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      position:relative;
-    }
+      html,
+      body {
+        height: 100%;
+        height: -webkit-fill-available;
+        overflow: hidden;
+        touch-action: manipulation;
+      }
 
-    .hint{
-      position:absolute;
-      bottom:18px;
-      left:0; right:0;
-      text-align:center;
-      color:var(--muted);
-      font-weight:650;
-      z-index: 5;
-      pointer-events:none;
-    }
+      body {
+        font-family: "Space Grotesk", "Outfit", sans-serif;
+        background: var(--bg-dark);
+        color: var(--white);
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+      }
 
-    /* Envelope */
-    .envelopeWrap{
-      width:min(360px,92vw);
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      z-index: 10;
-      transition: transform 240ms ease, opacity 320ms ease;
-      touch-action: manipulation;
-    }
-    .envelopeWrap:active{ transform: scale(0.98); }
+      /* ========== BACKGROUND ========== */
+      .bg {
+        position: fixed;
+        inset: 0;
+        background: var(--bg-game);
+        z-index: 0;
+        transition: background 1.5s ease;
+      }
 
-    .envelope{
-      aspect-ratio:16/11;
-      background:rgba(255,255,255,.35);
-      border-radius:18px;
-      box-shadow:var(--shadow);
-      position:relative;
-      overflow:hidden;
-    }
+      .bg.love-mode {
+        background: var(--bg-love);
+      }
 
-    .pocket{
-      position:absolute; bottom:0; left:0; right:0; height:58%;
-      background:rgba(255,255,255,.45);
-      clip-path:polygon(0 0,50% 68%,100% 0,100% 100%,0 100%);
-      border-top: 1px solid rgba(0,0,0,0.06);
-    }
+      .bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse at 20% 80%,
+            rgba(255, 107, 157, 0.12) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 80% 20%,
+            rgba(197, 108, 240, 0.12) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 50% 50%,
+            rgba(255, 64, 129, 0.06) 0%,
+            transparent 70%
+          );
+        animation: bgPulse 10s ease-in-out infinite;
+        opacity: 0;
+        transition: opacity 1.5s ease;
+      }
 
-    .flap{
-      position:absolute; top:0; left:0; right:0; height:60%;
-      background:rgba(255,255,255,.6);
-      clip-path:polygon(0 0,50% 82%,100% 0,100% 0,0 0);
-      transform-origin:top;
-      transform: rotateX(0deg);
-      transition: transform .7s cubic-bezier(.2,.9,.2,1);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-    }
+      .bg.love-mode::before {
+        opacity: 1;
+      }
 
-    .seal{
-      position:absolute; top:52%; left:50%;
-      transform:translate(-50%,-50%);
-      width:54px; height:54px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 30%,#ff78a7,var(--pink));
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:20px;
-      font-weight:900;
-      box-shadow: var(--shadow2);
-    }
+      @keyframes bgPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+      }
 
-    /* open state */
-    .opened .flap{ transform: rotateX(165deg); }
+      /* Floating particles */
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
 
-    /* Letter overlay */
-    .letterOverlay{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      opacity:0;
-      pointer-events:none;
-      transition: opacity 420ms ease;
-      z-index: 50;
-    }
-    .letterOverlay.show{
-      opacity:1;
-      pointer-events:auto;
-    }
+      .particles.show {
+        opacity: 1;
+      }
 
-    /* paper with texture */
-    .paper{
-      width:min(520px,94vw);
-      height:min(740px,88vh);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      transform: translateY(18px) scale(0.98);
-      transition: transform 520ms cubic-bezier(.2,.9,.2,1);
-      background:
-        repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(0,0,0,.012) 4px),
-        repeating-linear-gradient(90deg, transparent 0, transparent 7px, rgba(0,0,0,.010) 8px),
-        radial-gradient(700px 360px at 20% 18%, rgba(255, 228, 190, 0.45), transparent 55%),
-        radial-gradient(600px 320px at 85% 76%, rgba(255, 214, 228, 0.40), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,1));
-    }
-    .letterOverlay.show .paper{
-      transform: translateY(0) scale(1);
-    }
+      .particle {
+        position: absolute;
+        opacity: 0;
+        animation: floatUp 18s linear infinite;
+      }
 
-    .paperTop{
-      padding:18px 18px 12px;
-      border-bottom:1px solid rgba(0,0,0,.06);
-      background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55));
-      backdrop-filter: blur(2px);
-    }
-    .toLine{
-      font-family:"Playfair Display", serif;
-      font-weight:700;
-      letter-spacing:0.2px;
-    }
+      @keyframes floatUp {
+        0% {
+          transform: translateY(100vh) rotate(0deg) scale(0.5);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.7;
+          transform: translateY(80vh) rotate(36deg) scale(0.8);
+        }
+        90% {
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-50px) rotate(360deg) scale(1);
+          opacity: 0;
+        }
+      }
 
-    .paperBody{
-      padding:18px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      flex:1;
-    }
-    .hand{
-      font-family:"Great Vibes", cursive;
-      font-size:2.2rem;
-      line-height:1.1;
-      margin: 6px 0 10px;
-    }
-    .text{
-      font-family:"Playfair Display", serif;
-      font-size:1.05rem;
-      line-height:1.75;
-      white-space:pre-wrap;
-      margin:0;
-    }
+      /* ========== APP CONTAINER ========== */
+      .app {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        max-width: 500px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+        padding: 0;
+        overflow: hidden;
+      }
 
-    /* Type cursor */
-    .typeCursor::after{
-      content:"";
-      display:inline-block;
-      width:8px;
-      height:1em;
-      background:rgba(0,0,0,.25);
-      margin-left:6px;
-      border-radius:2px;
-      animation: blink 900ms infinite;
-      vertical-align: -0.15em;
-    }
-    @keyframes blink{ 50%{ opacity:0; } }
+      /* ========== SCREENS ========== */
+      .screen {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: calc(var(--safe-top) + 16px) 16px
+          calc(var(--safe-bottom) + 16px);
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.95) translateY(10px);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
 
-    /* Toast */
-    .toast{
-      position:fixed;
-      bottom:16px;
-      left:50%;
-      transform:translateX(-50%) translateY(20px);
-      width:min(520px,92vw);
-      background:rgba(255,255,255,.75);
-      padding:12px 14px;
-      border-radius:18px;
-      box-shadow:var(--shadow2);
-      opacity:0;
-      pointer-events:none;
-      transition:.25s;
-      z-index:70;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .toast.show{
-      opacity:1;
-      pointer-events:auto;
-      transform:translateX(-50%) translateY(0);
-    }
-    .toast b{ font-weight:900; }
-    .toast button{
-      border:none;
-      padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,59,122,0.12);
-      color: var(--pink);
-      font-weight:900;
-      cursor:pointer;
-    }
+      .screen.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1) translateY(0);
+      }
 
-    /* Question */
-    .question{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      opacity:0;
-      pointer-events:none;
-      transition:.35s;
-      z-index:80;
-    }
-    .question.show{ opacity:1; pointer-events:auto; }
+      /* ========== SCREEN 0: PUZZLE PRANK ========== */
+      .puzzle-screen {
+        background: transparent;
+      }
 
-    .qCard{
-      background:rgba(255,255,255,.75);
-      padding:20px;
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      text-align:center;
-      width:min(420px,92vw);
-      backdrop-filter: blur(10px);
-      border:1px solid rgba(0,0,0,0.06);
-    }
-    .qCard h2{
-      margin: 6px 0 8px;
-      font-family:"Playfair Display", serif;
-      font-weight:800;
-      font-size:1.55rem;
-    }
-    .qCard p{
-      margin:0 0 14px;
-      color:var(--muted);
-      font-weight:650;
-    }
+      .puzzle-card {
+        background: var(--glass-strong);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        padding: 28px 24px;
+        width: 100%;
+        max-width: 360px;
+        text-align: center;
+      }
 
-    .btnRow{
-      position:relative;
-      height:160px;
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-      user-select:none;
-      touch-action:none;
-    }
+      .puzzle-icon {
+        font-size: 56px;
+        margin-bottom: 16px;
+        animation: bounce 2s ease-in-out infinite;
+      }
 
-    .btnPill{
-      padding:14px 22px;
-      border-radius:999px;
-      border:none;
-      font-weight:900;
-      font-size:1.05rem;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      position:absolute;
-      top:0;
-      left:50%;
-      transform: translateX(-50%);
-      user-select:none;
-    }
-    .yes{
-      background:var(--pink);
-      color:#fff;
-      box-shadow: 0 14px 28px rgba(255,59,122,0.22), 0 16px 40px rgba(0,0,0,0.16);
-    }
-    .no{
-      background:#fff;
-      border:1px solid rgba(0,0,0,0.08);
-      box-shadow: 0 12px 22px rgba(0,0,0,0.12);
-    }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
 
-    /* Explosion particles */
-    .particle{
-      position:fixed;
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      background: rgba(255,59,122,0.9);
-      pointer-events:none;
-      z-index:95;
-      animation: pop 520ms ease-out forwards;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.12);
-    }
-    @keyframes pop{
-      from{ transform: translate(0,0) scale(1); opacity:1; }
-      to{ transform: translate(var(--dx), var(--dy)) scale(0.2); opacity:0; }
-    }
+      .puzzle-title {
+        font-size: clamp(22px, 5vw, 26px);
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
 
-    /* Celebration */
-    .celebrate{
-      position:fixed;
-      inset:0;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      opacity:0;
-      pointer-events:none;
-      transition:.35s;
-      z-index:100;
-      text-align:center;
-      padding:18px;
-    }
-    .celebrate.show{ opacity:1; pointer-events:auto; }
+      .puzzle-sub {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+      }
 
-    .bigHeart{
-      font-size:120px;
-      line-height:1;
-      filter: drop-shadow(0 18px 28px rgba(255,59,122,0.20));
-      animation: heartPop 900ms cubic-bezier(.2,.9,.2,1) both;
-    }
-    @keyframes heartPop{
-      0%{ transform: scale(0.2); opacity:0; }
-      55%{ transform: scale(1.18); opacity:1; }
-      100%{ transform: scale(1.0); opacity:1; }
-    }
-    .loveLine{
-      font-family:"Playfair Display", serif;
-      font-weight:850;
-      font-size:1.6rem;
-      margin-top: 6px;
-    }
-    .loveYou{
-      font-family:"Great Vibes", cursive;
-      font-size:3rem;
-      line-height:1.05;
-    }
-  </style>
-</head>
+      .puzzle-timer {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--cyan);
+        margin-bottom: 20px;
+        font-family: "Space Grotesk", monospace;
+      }
 
-<body>
-  <div class="stage">
+      .puzzle-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 24px;
+      }
 
-    <!-- Envelope -->
-    <div class="envelopeWrap" id="envWrap" aria-label="Open letter">
-      <div class="envelope" id="envelope">
-        <div class="flap"></div>
-        <div class="pocket"></div>
-        <div class="seal">❤</div>
-      </div>
+      .puzzle-tile {
+        aspect-ratio: 1;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 217, 255, 0.15),
+          rgba(197, 108, 240, 0.15)
+        );
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        font-size: clamp(24px, 6vw, 32px);
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .puzzle-tile:active {
+        transform: scale(0.92);
+      }
+
+      .puzzle-tile.empty {
+        background: rgba(255, 255, 255, 0.03);
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+      }
+
+      .puzzle-tile.correct {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 255, 136, 0.3),
+          rgba(0, 217, 255, 0.2)
+        );
+        border-color: rgba(0, 255, 136, 0.5);
+      }
+
+      .puzzle-moves {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .puzzle-hint {
+        margin-top: 16px;
+        font-size: 12px;
+        color: var(--text-muted);
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .puzzle-hint.show {
+        opacity: 1;
+      }
+
+      /* ========== SCREEN 1: SURPRISE REVEAL - ENVELOPE ========== */
+      .envelope-wrapper {
+        perspective: 1000px;
+        margin-bottom: 24px;
+        cursor: pointer;
+      }
+
+      .envelope {
+        position: relative;
+        width: clamp(160px, 45vw, 220px);
+        height: clamp(110px, 32vw, 150px);
+        background: linear-gradient(145deg, #f8e1e8, #ffd6e0);
+        border-radius: 10px;
+        box-shadow:
+          0 20px 60px rgba(255, 107, 157, 0.4),
+          0 10px 30px rgba(0, 0, 0, 0.2),
+          inset 0 -3px 0 rgba(0, 0, 0, 0.05);
+        animation: envelopeAppear 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        transition: transform 0.3s ease;
+      }
+
+      .envelope-wrapper:active .envelope {
+        transform: scale(0.95);
+      }
+
+      @keyframes envelopeAppear {
+        0% {
+          transform: scale(0) rotate(-10deg);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.1) rotate(3deg);
+        }
+        100% {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      /* Envelope flap - closed by default */
+      .envelope-flap {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60%;
+        background: linear-gradient(145deg, #ffe4ec, #ffc8d6);
+        clip-path: polygon(0 0, 50% 70%, 100% 0);
+        border-radius: 10px 10px 0 0;
+        transform-origin: top center;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+      }
+
+      .envelope.opened .envelope-flap {
+        transform: rotateX(180deg);
+      }
+
+      .envelope-heart {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: clamp(36px, 10vw, 50px);
+        z-index: 15;
+        filter: drop-shadow(0 4px 8px rgba(255, 107, 157, 0.5));
+        animation: heartFloat 2s ease-in-out infinite;
+        transition: all 0.5s ease;
+      }
+
+      .envelope.opened .envelope-heart {
+        transform: translate(-50%, -50%) scale(1.3);
+        animation: heartBurst 0.6s ease-out forwards;
+      }
+
+      @keyframes heartFloat {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+          transform: translate(-50%, -55%) scale(1.05);
+        }
+      }
+
+      @keyframes heartBurst {
+        0% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translate(-50%, -80%) scale(1.5);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -120%) scale(0.5);
+          opacity: 0;
+        }
+      }
+
+      .envelope-letter {
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%) translateY(0);
+        width: 75%;
+        height: 70%;
+        background: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: var(--pink);
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+        z-index: 5;
+      }
+
+      .envelope-letter::before {
+        content: "♥ ♥ ♥";
+        letter-spacing: 4px;
+      }
+
+      .envelope.opened .envelope-letter {
+        transform: translateX(-50%) translateY(-60%);
+        opacity: 1;
+      }
+
+      .envelope-sparkles {
+        position: absolute;
+        inset: -30px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s ease 0.4s;
+      }
+
+      .envelope.opened .envelope-sparkles {
+        opacity: 1;
+      }
+
+      .sparkle {
+        position: absolute;
+        font-size: 20px;
+        animation: sparkle 1.5s ease-in-out infinite;
+      }
+
+      .sparkle:nth-child(1) {
+        top: -10px;
+        left: 20%;
+        animation-delay: 0s;
+      }
+      .sparkle:nth-child(2) {
+        top: 0;
+        right: 5%;
+        animation-delay: 0.2s;
+      }
+      .sparkle:nth-child(3) {
+        bottom: 30%;
+        left: -5%;
+        animation-delay: 0.4s;
+      }
+      .sparkle:nth-child(4) {
+        bottom: 10%;
+        right: 15%;
+        animation-delay: 0.6s;
+      }
+      .sparkle:nth-child(5) {
+        top: 30%;
+        left: -10%;
+        animation-delay: 0.8s;
+      }
+      .sparkle:nth-child(6) {
+        top: 20%;
+        right: -5%;
+        animation-delay: 1s;
+      }
+
+      @keyframes sparkle {
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(0.5) rotate(0deg);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2) rotate(180deg);
+        }
+      }
+
+      /* Tap instruction */
+      .envelope-tap-hint {
+        margin-top: 24px;
+        font-size: 14px;
+        color: var(--text-soft);
+        animation: tapHint 2s ease-in-out infinite;
+      }
+
+      @keyframes tapHint {
+        0%,
+        100% {
+          opacity: 0.6;
+          transform: translateY(0);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-5px);
+        }
+      }
+
+      .envelope.opened ~ .envelope-tap-hint {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Hidden content that reveals after opening */
+      .reveal-content {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+        text-align: center;
+      }
+
+      .reveal-content.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .reveal-title {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(42px, 10vw, 56px);
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        animation: titleReveal 0.6s ease-out 0.2s both;
+      }
+
+      @keyframes titleReveal {
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .reveal-sub {
+        font-size: clamp(13px, 3vw, 15px);
+        color: var(--text-muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+        animation: subReveal 0.6s ease-out 0.4s both;
+      }
+
+      @keyframes subReveal {
+        0% {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .reveal-continue-btn {
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        border: none;
+        padding: 16px 40px;
+        border-radius: 50px;
+        font-family: "Outfit", sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 12px 40px rgba(255, 107, 157, 0.4);
+        transition: all 0.3s ease;
+        animation: btnReveal 0.6s ease-out 0.6s both;
+      }
+
+      @keyframes btnReveal {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .reveal-continue-btn:active {
+        transform: scale(0.96);
+        box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+      }
+
+      /* ========== SCREEN 2: LETTER ========== */
+      .letter-screen {
+        padding: 0;
+      }
+
+      .letter-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .letter-header {
+        padding: calc(var(--safe-top) + 48px) 24px 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .letter-date {
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .letter-to {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(32px, 8vw, 40px);
+        color: var(--pink);
+      }
+
+      .letter-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 24px 140px;
+        -webkit-overflow-scrolling: touch;
+        mask-image: linear-gradient(
+          to bottom,
+          transparent,
+          black 30px,
+          black calc(100% - 80px),
+          transparent
+        );
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          transparent,
+          black 30px,
+          black calc(100% - 80px),
+          transparent
+        );
+      }
+
+      .letter-greeting {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(24px, 6vw, 30px);
+        font-style: italic;
+        color: var(--purple-light);
+        margin-bottom: 20px;
+      }
+
+      .letter-text {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(17px, 4.2vw, 20px);
+        line-height: 1.85;
+        color: var(--text-soft);
+        white-space: pre-wrap;
+      }
+
+      .typing-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1.15em;
+        background: var(--pink);
+        margin-left: 3px;
+        animation: cursorBlink 0.9s ease-in-out infinite;
+        vertical-align: text-bottom;
+      }
+
+      @keyframes cursorBlink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .letter-signature {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(28px, 7vw, 36px);
+        color: var(--pink);
+        margin-top: 28px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.8s ease;
+      }
+
+      .letter-signature.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .continue-btn {
+        position: fixed;
+        bottom: max(28px, calc(var(--safe-bottom) + 16px));
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        padding: 16px 40px;
+        border-radius: 50px;
+        font-family: "Outfit", sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.5s ease;
+        z-index: 50;
+      }
+
+      .continue-btn.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .continue-btn:active {
+        transform: translateX(-50%) scale(0.96);
+        background: rgba(255, 107, 157, 0.2);
+      }
+
+      /* ========== SCREEN 3: QUESTION ========== */
+      .question-card {
+        background: var(--glass);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        padding: clamp(28px, 6vw, 40px) clamp(20px, 5vw, 28px);
+        text-align: center;
+        width: 100%;
+        max-width: 360px;
+      }
+
+      .question-emoji {
+        font-size: clamp(56px, 14vw, 72px);
+        margin-bottom: 16px;
+        animation: floatHeart 3s ease-in-out infinite;
+      }
+
+      @keyframes floatHeart {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-12px) scale(1.05);
+        }
+      }
+
+      .question-title {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(24px, 6vw, 30px);
+        font-weight: 600;
+        margin-bottom: 8px;
+        line-height: 1.3;
+      }
+
+      .question-sub {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+      }
+
+      .btn-row {
+        position: relative;
+        min-height: 160px;
+      }
+
+      .answer-btn {
+        padding: 18px 36px;
+        border-radius: 50px;
+        font-family: "Outfit", sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        width: 100%;
+      }
+
+      .yes-btn {
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        color: white;
+        box-shadow: 0 10px 35px rgba(255, 107, 157, 0.4);
+        margin-bottom: 12px;
+      }
+
+      .yes-btn:active {
+        transform: scale(0.96);
+      }
+
+      .no-btn {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        color: white;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        transition: all 0.15s ease;
+      }
+
+      /* ========== SCREEN 4: CELEBRATION ========== */
+      .celebrate-heart {
+        font-size: clamp(90px, 22vw, 130px);
+        animation: celebrateHeart 1s ease-out;
+        filter: drop-shadow(0 0 50px rgba(255, 107, 157, 0.7));
+      }
+
+      @keyframes celebrateHeart {
+        0% {
+          transform: scale(0) rotate(-10deg);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.25) rotate(5deg);
+        }
+        100% {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      .celebrate-text {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(44px, 11vw, 60px);
+        background: linear-gradient(
+          135deg,
+          var(--pink),
+          var(--purple),
+          var(--gold)
+        );
+        background-size: 200% 200%;
+        animation:
+          gradientShift 4s ease infinite,
+          fadeUp 0.8s ease-out 0.3s both;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-top: 12px;
+      }
+
+      @keyframes gradientShift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      .celebrate-sub {
+        font-size: clamp(16px, 4vw, 19px);
+        color: var(--text-soft);
+        margin-top: 10px;
+        animation: fadeUp 0.8s ease-out 0.5s both;
+        transition: opacity 0.4s ease;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Confetti */
+      .confetti {
+        position: fixed;
+        pointer-events: none;
+        z-index: 200;
+        animation: confettiFall 3.5s ease-out forwards;
+      }
+
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(-20px) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* ========== SURPRISES PANEL ========== */
+      .surprises-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--glass);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border-top: 1px solid var(--glass-border);
+        border-radius: 28px 28px 0 0;
+        padding: 22px 16px calc(22px + var(--safe-bottom));
+        transform: translateY(100%);
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 80;
+      }
+
+      .surprises-panel.show {
+        transform: translateY(0);
+      }
+
+      .surprises-title {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 14px;
+        text-align: center;
+      }
+
+      .surprises-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .surprise-item {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        padding: clamp(14px, 3vw, 18px) 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+
+      .surprise-item:active {
+        transform: scale(0.94);
+        background: rgba(255, 107, 157, 0.12);
+      }
+
+      .surprise-icon {
+        font-size: clamp(26px, 6vw, 32px);
+        margin-bottom: 6px;
+      }
+
+      .surprise-label {
+        font-size: clamp(10px, 2.5vw, 12px);
+        color: var(--text-soft);
+      }
+
+      /* ========== OVERLAYS ========== */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.92);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+        padding: calc(var(--safe-top) + 20px) 20px
+          calc(var(--safe-bottom) + 20px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .overlay.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .overlay-close {
+        margin-top: 36px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        padding: 14px 32px;
+        border-radius: 50px;
+        color: white;
+        font-family: "Outfit", sans-serif;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      /* Hug overlay */
+      .hug-emoji {
+        font-size: clamp(100px, 25vw, 140px);
+        transition: transform 0.2s ease;
+      }
+
+      .hug-text {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(28px, 7vw, 36px);
+        color: var(--pink);
+        margin-top: 16px;
+        text-align: center;
+        padding: 0 16px;
+      }
+
+      .hug-meter {
+        width: min(220px, 70vw);
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin-top: 20px;
+        overflow: hidden;
+      }
+
+      .hug-meter-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--pink), var(--purple));
+        width: 0%;
+        border-radius: 10px;
+        transition: width 0.08s ease;
+      }
+
+      .hug-instruction {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 12px;
+      }
+
+      /* Kiss Attack Game */
+      .kiss-game {
+        position: relative;
+        width: 100%;
+        height: 50vh;
+        max-height: 350px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .kiss-target {
+        width: clamp(100px, 28vw, 140px);
+        height: clamp(100px, 28vw, 140px);
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 107, 157, 0.3),
+          rgba(197, 108, 240, 0.3)
+        );
+        border: 3px solid var(--pink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(50px, 14vw, 70px);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        position: relative;
+        box-shadow: 0 0 40px rgba(255, 107, 157, 0.4);
+        animation: kissTargetPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes kissTargetPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 40px rgba(255, 107, 157, 0.4);
+        }
+        50% {
+          box-shadow:
+            0 0 60px rgba(255, 107, 157, 0.7),
+            0 0 100px rgba(255, 107, 157, 0.3);
+        }
+      }
+
+      .kiss-target:active {
+        transform: scale(0.9);
+      }
+
+      .kiss-target.kissed {
+        animation: kissReact 0.4s ease-out;
+      }
+
+      @keyframes kissReact {
+        0% {
+          transform: scale(1);
+        }
+        30% {
+          transform: scale(1.3);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .kiss-face {
+        transition: all 0.2s ease;
+      }
+
+      .kiss-score {
+        margin-top: 24px;
+        text-align: center;
+      }
+
+      .kiss-score-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .kiss-score-value {
+        font-size: clamp(48px, 12vw, 64px);
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .kiss-combo {
+        font-size: 16px;
+        color: var(--gold);
+        font-weight: 600;
+        height: 24px;
+        margin-top: 8px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .kiss-combo.show {
+        opacity: 1;
+        animation: comboFlash 0.3s ease-out;
+      }
+
+      @keyframes comboFlash {
+        0% {
+          transform: scale(1.5);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .kiss-instruction {
+        font-size: 14px;
+        color: var(--text-soft);
+        margin-top: 16px;
+      }
+
+      .kiss-flying {
+        position: fixed;
+        font-size: 36px;
+        pointer-events: none;
+        z-index: 300;
+        animation: kissFly 0.8s ease-out forwards;
+      }
+
+      @keyframes kissFly {
+        0% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.8) rotate(20deg) translateY(-60px);
+        }
+      }
+
+      .kiss-burst {
+        position: absolute;
+        font-size: 24px;
+        pointer-events: none;
+        animation: kissBurst 0.6s ease-out forwards;
+      }
+
+      @keyframes kissBurst {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) scale(0.5);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--tx), var(--ty)) scale(1);
+        }
+      }
+
+      /* Photo Memories Gallery */
+      .memories-gallery {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 360px;
+      }
+
+      .memory-frame {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+        aspect-ratio: 4/5;
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 107, 157, 0.2),
+          rgba(197, 108, 240, 0.2)
+        );
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.4),
+          0 0 0 3px rgba(255, 255, 255, 0.1),
+          inset 0 0 60px rgba(255, 107, 157, 0.1);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .memory-frame:active {
+        transform: scale(0.97);
+      }
+
+      .memory-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      .memory-image.loaded {
+        opacity: 1;
+      }
+
+      .memory-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+      }
+
+      .memory-placeholder-text {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 12px;
+      }
+
+      .memory-counter {
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--text-soft);
+      }
+
+      .memory-counter span {
+        color: var(--pink);
+        font-weight: 600;
+      }
+
+      .memory-caption {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(22px, 5.5vw, 28px);
+        color: white;
+        margin-top: 16px;
+        text-align: center;
+        min-height: 36px;
+      }
+
+      .memory-tap {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 12px;
+        animation: tapPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes tapPulse {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .memory-dots {
+        display: flex;
+        gap: 8px;
+        margin-top: 20px;
+      }
+
+      .memory-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .memory-dot.active {
+        background: var(--pink);
+        box-shadow: 0 0 10px var(--pink);
+      }
+
+      .memory-dot.viewed {
+        background: var(--purple);
+      }
+
+      /* Final message */
+      .memory-final {
+        text-align: center;
+        animation: finalAppear 0.8s ease-out;
+      }
+
+      .memory-final-emoji {
+        font-size: 80px;
+        margin-bottom: 20px;
+      }
+
+      .memory-final-title {
+        font-family: "Pinyon Script", cursive;
+        font-size: clamp(32px, 8vw, 42px);
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+      }
+
+      .memory-final-text {
+        font-size: 16px;
+        color: var(--text-soft);
+        line-height: 1.6;
+      }
+
+      @keyframes finalAppear {
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Progress dots */
+      .progress {
+        position: fixed;
+        top: calc(var(--safe-top) + 16px);
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 30;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      .progress.show {
+        opacity: 1;
+      }
+
+      .progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+      }
+
+      .progress-dot.active {
+        background: var(--pink);
+        border-color: var(--pink);
+        box-shadow: 0 0 12px var(--pink);
+      }
+
+      .progress-dot.completed {
+        background: var(--purple);
+        border-color: var(--purple);
+      }
+
+      /* Music button */
+      .music-btn {
+        position: fixed;
+        top: calc(var(--safe-top) + 14px);
+        right: 16px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 100;
+        transition: all 0.3s ease;
+        opacity: 0;
+      }
+
+      .music-btn.show {
+        opacity: 1;
+      }
+      .music-btn:active {
+        transform: scale(0.92);
+      }
+      .music-btn.playing {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(255, 107, 157, 0);
+        }
+      }
+
+      /* ========== MOBILE RESPONSIVE FIXES ========== */
+
+      /* Small phones (iPhone SE, etc.) */
+      @media screen and (max-width: 375px) {
+        .puzzle-card {
+          padding: 20px 16px;
+          border-radius: 22px;
+        }
+
+        .puzzle-icon {
+          font-size: 44px;
+          margin-bottom: 12px;
+        }
+
+        .puzzle-title {
+          font-size: 20px;
+        }
+
+        .puzzle-sub {
+          font-size: 12px;
+          margin-bottom: 16px;
+        }
+
+        .puzzle-timer {
+          font-size: 26px;
+          margin-bottom: 14px;
+        }
+
+        .puzzle-grid {
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+
+        .puzzle-tile {
+          font-size: 22px;
+          border-radius: 10px;
+        }
+
+        .envelope {
+          width: 150px;
+          height: 105px;
+        }
+
+        .envelope-heart {
+          font-size: 34px;
+        }
+
+        .reveal-title {
+          font-size: 36px;
+        }
+
+        .reveal-sub {
+          font-size: 12px;
+          margin-bottom: 20px;
+        }
+
+        .reveal-continue-btn {
+          padding: 14px 32px;
+          font-size: 14px;
+        }
+
+        .letter-header {
+          padding: calc(var(--safe-top) + 36px) 16px 14px;
+        }
+
+        .letter-to {
+          font-size: 28px;
+        }
+
+        .letter-body {
+          padding: 0 16px 120px;
+        }
+
+        .letter-greeting {
+          font-size: 22px;
+          margin-bottom: 14px;
+        }
+
+        .letter-text {
+          font-size: 15px;
+          line-height: 1.75;
+        }
+
+        .letter-signature {
+          font-size: 24px;
+          margin-top: 20px;
+        }
+
+        .continue-btn {
+          padding: 14px 32px;
+          font-size: 14px;
+          bottom: max(20px, calc(var(--safe-bottom) + 12px));
+        }
+
+        .question-card {
+          padding: 24px 16px;
+          border-radius: 24px;
+        }
+
+        .question-emoji {
+          font-size: 50px;
+          margin-bottom: 12px;
+        }
+
+        .question-title {
+          font-size: 22px;
+        }
+
+        .question-sub {
+          font-size: 13px;
+          margin-bottom: 20px;
+        }
+
+        .btn-row {
+          min-height: 140px;
+        }
+
+        .answer-btn {
+          padding: 14px 28px;
+          font-size: 14px;
+        }
+
+        .celebrate-heart {
+          font-size: 80px;
+        }
+
+        .celebrate-text {
+          font-size: 38px;
+        }
+
+        .celebrate-sub {
+          font-size: 14px;
+        }
+
+        .surprises-panel {
+          padding: 18px 12px calc(18px + var(--safe-bottom));
+          border-radius: 22px 22px 0 0;
+        }
+
+        .surprises-grid {
+          gap: 8px;
+        }
+
+        .surprise-item {
+          padding: 12px 6px;
+          border-radius: 14px;
+        }
+
+        .surprise-icon {
+          font-size: 24px;
+        }
+
+        .surprise-label {
+          font-size: 10px;
+        }
+
+        .overlay {
+          padding: 16px;
+        }
+
+        .overlay-close {
+          padding: 12px 24px;
+          font-size: 13px;
+          margin-top: 24px;
+        }
+
+        .hug-emoji {
+          font-size: 80px;
+        }
+
+        .hug-text {
+          font-size: 24px;
+        }
+
+        .hug-meter {
+          width: 180px;
+        }
+
+        .kiss-game {
+          height: 45vh;
+          max-height: 280px;
+        }
+
+        .kiss-target {
+          width: 90px;
+          height: 90px;
+        }
+
+        .kiss-score-value {
+          font-size: 40px;
+        }
+
+        .kiss-combo {
+          font-size: 14px;
+        }
+
+        .memory-frame {
+          max-width: 250px;
+        }
+
+        .memory-caption {
+          font-size: 20px;
+        }
+
+        .memory-final-emoji {
+          font-size: 60px;
+        }
+
+        .memory-final-title {
+          font-size: 28px;
+        }
+
+        .memory-final-text {
+          font-size: 14px;
+        }
+      }
+
+      /* Medium phones (iPhone 14, etc.) */
+      @media screen and (max-width: 430px) and (min-width: 376px) {
+        .puzzle-card {
+          padding: 24px 20px;
+        }
+
+        .letter-header {
+          padding: calc(var(--safe-top) + 40px) 20px 16px;
+        }
+
+        .letter-body {
+          padding: 0 20px 130px;
+        }
+
+        .continue-btn {
+          bottom: max(24px, calc(var(--safe-bottom) + 14px));
+        }
+
+        .surprises-panel {
+          padding: 20px 14px calc(20px + var(--safe-bottom));
+        }
+      }
+
+      /* Fix for very short screens */
+      @media screen and (max-height: 667px) {
+        .screen {
+          padding-top: calc(var(--safe-top) + 12px);
+          padding-bottom: calc(var(--safe-bottom) + 12px);
+        }
+
+        .puzzle-card {
+          padding: 16px 14px;
+        }
+
+        .puzzle-icon {
+          font-size: 40px;
+          margin-bottom: 10px;
+        }
+
+        .puzzle-timer {
+          font-size: 24px;
+          margin-bottom: 12px;
+        }
+
+        .puzzle-grid {
+          gap: 6px;
+          margin-bottom: 14px;
+        }
+
+        .envelope-wrapper {
+          margin-bottom: 16px;
+        }
+
+        .envelope-tap-hint {
+          margin-top: 16px;
+        }
+
+        .reveal-content {
+          margin-top: 12px;
+        }
+
+        .letter-header {
+          padding-top: calc(var(--safe-top) + 30px);
+          padding-bottom: 12px;
+        }
+
+        .letter-body {
+          padding-bottom: 100px;
+        }
+
+        .letter-greeting {
+          margin-bottom: 12px;
+        }
+
+        .question-card {
+          padding: 20px 16px;
+        }
+
+        .question-emoji {
+          font-size: 48px;
+          margin-bottom: 10px;
+        }
+
+        .question-sub {
+          margin-bottom: 20px;
+        }
+
+        .btn-row {
+          min-height: 130px;
+        }
+
+        .celebrate-heart {
+          font-size: 70px;
+        }
+
+        .celebrate-text {
+          font-size: 36px;
+        }
+
+        .kiss-game {
+          height: 40vh;
+          max-height: 250px;
+        }
+
+        .kiss-target {
+          width: 85px;
+          height: 85px;
+        }
+
+        .kiss-score {
+          margin-top: 16px;
+        }
+
+        .kiss-score-value {
+          font-size: 36px;
+        }
+
+        .memory-frame {
+          max-width: 220px;
+        }
+
+        .memory-caption {
+          margin-top: 12px;
+        }
+
+        .memory-dots {
+          margin-top: 14px;
+        }
+
+        .overlay-close {
+          margin-top: 20px;
+        }
+      }
+
+      /* Landscape orientation - prevent layout issues */
+      @media screen and (orientation: landscape) and (max-height: 500px) {
+        .screen {
+          padding: 10px 16px;
+          overflow-y: auto;
+        }
+
+        .puzzle-card {
+          padding: 12px;
+          max-width: 320px;
+        }
+
+        .puzzle-icon {
+          font-size: 30px;
+          margin-bottom: 6px;
+        }
+
+        .puzzle-timer {
+          font-size: 20px;
+          margin-bottom: 8px;
+        }
+
+        .puzzle-grid {
+          gap: 4px;
+          max-width: 180px;
+          margin: 0 auto 10px;
+        }
+
+        .envelope {
+          width: 100px;
+          height: 70px;
+        }
+
+        .envelope-heart {
+          font-size: 24px;
+        }
+
+        .envelope-wrapper {
+          margin-bottom: 10px;
+        }
+
+        .reveal-title {
+          font-size: 28px;
+        }
+
+        .reveal-sub {
+          margin-bottom: 12px;
+        }
+
+        .letter-container {
+          flex-direction: row;
+        }
+
+        .letter-header {
+          width: 30%;
+          padding: 10px;
+        }
+
+        .letter-body {
+          width: 70%;
+          padding: 10px 16px 80px;
+        }
+
+        .question-card {
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          padding: 16px;
+        }
+
+        .question-emoji {
+          font-size: 40px;
+        }
+
+        .celebrate-heart {
+          font-size: 50px;
+        }
+
+        .celebrate-text {
+          font-size: 28px;
+        }
+
+        .surprises-panel {
+          padding: 12px;
+        }
+
+        .overlay {
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 16px;
+        }
+
+        .kiss-game {
+          height: auto;
+          flex-direction: row;
+          gap: 20px;
+        }
+
+        .memory-frame {
+          max-width: 180px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Background -->
+    <div class="bg" id="bg"></div>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Progress -->
+    <div class="progress" id="progress">
+      <div class="progress-dot" data-step="0"></div>
+      <div class="progress-dot" data-step="1"></div>
+      <div class="progress-dot" data-step="2"></div>
+      <div class="progress-dot" data-step="3"></div>
+      <div class="progress-dot" data-step="4"></div>
     </div>
 
-    <div class="hint" id="hint">Tap the Envelope</div>
+    <!-- Music button -->
+    <button class="music-btn" id="musicBtn">🔇</button>
 
-    <!-- Letter -->
-    <div class="letterOverlay" id="letterOverlay">
-      <div class="paper">
-        <div class="paperTop">
-          <div class="toLine">To: My dear Layloula</div>
-        </div>
-        <div class="paperBody" id="paperBody">
-          <div class="hand">My love,</div>
-          <p class="text typeCursor" id="letterText"></p>
-          <div style="height:200px"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Toast -->
-    <div class="toast" id="toast">
-      <div>
-        <b>💌 New message</b>
-        <div style="font-size:.92rem;color:rgba(0,0,0,.55);font-weight:650;">Tap to open (one question)</div>
-      </div>
-      <button id="toastBtn">Open</button>
-    </div>
-
-    <!-- Question -->
-    <div class="question" id="question">
-      <div class="qCard">
-        <h2>Will you be my Valentine? 💘</h2>
-        <p>Try to say no… if you can</p>
-        <div class="btnRow" id="btnRow">
-          <button class="btnPill yes" id="yesBtn">YES</button>
-          <button class="btnPill no" id="noBtn">NO</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Celebration -->
-    <div class="celebrate" id="celebrate">
-      <div class="bigHeart">💗</div>
-      <div class="loveLine">I love</div>
-      <div class="loveYou" id="loveYou">youuuuuuu</div>
-    </div>
-
-    <!-- Music -->
+    <!-- Audio -->
     <audio id="music" loop>
-      <source src="music.mp3" type="audio/mpeg">
+      <source src="music.mp3" type="audio/mpeg" />
     </audio>
 
-  </div>
+    <!-- App container -->
+    <div class="app">
+      <!-- Screen 0: Puzzle Prank -->
+      <div class="screen puzzle-screen active" id="screen0">
+        <div class="puzzle-card">
+          <div class="puzzle-icon">🧩</div>
+          <h1 class="puzzle-title">Quick Brain Test!</h1>
+          <p class="puzzle-sub">Solve this puzzle to unlock your reward</p>
+          <div class="puzzle-timer" id="puzzleTimer">00:00</div>
+          <div class="puzzle-grid" id="puzzleGrid"></div>
+          <div class="puzzle-moves">Moves: <span id="moveCount">0</span></div>
+          <div class="puzzle-hint" id="puzzleHint">
+            Almost there... keep going! 🎯
+          </div>
+        </div>
+      </div>
 
-  <script>
-    // ===== Letter content & typing speed =====
-    const LETTER_CONTENT = `I wrote this for 2 reasons :
-First because I didnt feel like making a powerpoint this time :)
-Second because you have truely become a big part in my life.
+      <!-- Screen 1: Surprise Reveal -->
+      <div class="screen" id="screen1">
+        <div class="envelope-wrapper" id="envelopeWrapper">
+          <div class="envelope" id="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-letter"></div>
+            <div class="envelope-heart">💌</div>
+            <div class="envelope-sparkles">
+              <span class="sparkle">✨</span>
+              <span class="sparkle">💖</span>
+              <span class="sparkle">✨</span>
+              <span class="sparkle">💕</span>
+              <span class="sparkle">💫</span>
+              <span class="sparkle">✨</span>
+            </div>
+          </div>
+        </div>
+        <div class="envelope-tap-hint" id="tapHint">
+          👆 Tap the envelope to open
+        </div>
 
-The distance may seperate us but i always think about you and plan for you.
+        <div class="reveal-content" id="revealContent">
+          <h1 class="reveal-title">Surprise!</h1>
+          <p class="reveal-sub">This was never a puzzle game...</p>
+          <button class="reveal-continue-btn" id="revealContinueBtn">
+            Read My Letter 💌
+          </button>
+        </div>
+      </div>
 
-You will always have my support and i will be proud even if i could have contributed to 1% of your future sucess.
-The last times have been turbulent and very insightfull about our capability to pass storms.
-I know it will no always be sunshines and rainbows but i know one thing for sure : we will power through them and we will grow from it stronger.
+      <!-- Screen 2: Letter -->
+      <div class="screen letter-screen" id="screen2">
+        <div class="letter-container">
+          <div class="letter-header">
+            <div class="letter-date">February 14, 2026</div>
+            <div class="letter-to">My Dearest Marmuraa</div>
+          </div>
+          <div class="letter-body" id="letterBody">
+            <div class="letter-greeting">My love,</div>
+            <p class="letter-text" id="letterText"></p>
+            <span class="typing-cursor" id="cursor"></span>
+            <div class="letter-signature" id="signature">Forever Yours ❤️</div>
+          </div>
+        </div>
+        <button class="continue-btn" id="continueBtn">Continue →</button>
+      </div>
 
-Im flawed ("Yaaah 3aaad 3rftiha hhhhh") but I will always make bad decisions in life but one decision I wont regret is talking to you.
-You make things feel lighter.
-You make me feel happier
-You make me feel LOVED.
+      <!-- Screen 3: Question -->
+      <div class="screen" id="screen3">
+        <div class="question-card">
+          <div class="question-emoji">💘</div>
+          <h2 class="question-title">Will you be my Valentine?</h2>
+          <p class="question-sub">Try saying no... I dare you 😏</p>
+          <div class="btn-row" id="btnRow">
+            <button class="answer-btn yes-btn" id="yesBtn">
+              Yes, Always! 💕
+            </button>
+            <button class="answer-btn no-btn" id="noBtn">No</button>
+          </div>
+        </div>
+      </div>
 
-And I’m grateful for you,
-for your presence,
-your warmth,
+      <!-- Screen 4: Celebration -->
+      <div class="screen" id="screen4">
+        <div class="celebrate-heart">💖</div>
+        <div class="celebrate-text">I Love You!</div>
+        <div class="celebrate-sub" id="loveSub">More than words can say</div>
+      </div>
+    </div>
 
-So ......`;
+    <!-- Surprises panel -->
+    <div class="surprises-panel" id="surprisesPanel">
+      <div class="surprises-title">🎁 Unlocked Surprises</div>
+      <div class="surprises-grid">
+        <div class="surprise-item" id="hugSurprise">
+          <div class="surprise-icon">🤗</div>
+          <div class="surprise-label">Virtual Hug</div>
+        </div>
+        <div class="surprise-item" id="kissSurprise">
+          <div class="surprise-icon">💋</div>
+          <div class="surprise-label">Kisses</div>
+        </div>
+        <div class="surprise-item" id="notesSurprise">
+          <div class="surprise-icon">�</div>
+          <div class="surprise-label">Memories</div>
+        </div>
+      </div>
+    </div>
 
-    const TYPE_SPEED_MS = 65; // slower = larger number
+    <!-- Hug overlay -->
+    <div class="overlay" id="hugOverlay">
+      <div class="hug-emoji" id="hugEmoji">🤗</div>
+      <div class="hug-text" id="hugText">Hold the screen to hug me...</div>
+      <div class="hug-meter">
+        <div class="hug-meter-fill" id="hugMeter"></div>
+      </div>
+      <div class="hug-instruction">Press & hold for the tightest hug 💕</div>
+      <button class="overlay-close" id="hugClose">Done hugging</button>
+    </div>
 
-    // ===== Elements =====
-    const envWrap = document.getElementById("envWrap");
-    const envelope = document.getElementById("envelope");
-    const hint = document.getElementById("hint");
+    <!-- Kiss Attack Game -->
+    <div class="overlay" id="kissOverlay">
+      <div class="kiss-game">
+        <div class="kiss-target" id="kissTarget">
+          <span class="kiss-face" id="kissFace">😚</span>
+        </div>
+        <div class="kiss-score">
+          <div class="kiss-score-label">Kisses Sent</div>
+          <div class="kiss-score-value" id="kissScore">0</div>
+          <div class="kiss-combo" id="kissCombo"></div>
+        </div>
+        <div class="kiss-instruction">Tap to kiss me! 💋</div>
+      </div>
+      <button class="overlay-close" id="kissClose">Done kissing 😘</button>
+    </div>
 
-    const letterOverlay = document.getElementById("letterOverlay");
-    const paperBody = document.getElementById("paperBody");
-    const letterText = document.getElementById("letterText");
+    <!-- Photo Memories overlay -->
+    <div class="overlay" id="notesOverlay">
+      <div class="memories-gallery" id="memoriesGallery">
+        <div class="memory-frame" id="memoryFrame">
+          <div class="memory-placeholder" id="memoryPlaceholder">
+            <span>📸</span>
+            <span class="memory-placeholder-text">Loading memory...</span>
+          </div>
+          <img class="memory-image" id="memoryImage" alt="Our memory" />
+        </div>
+        <div class="memory-caption" id="memoryCaption"></div>
+        <div class="memory-dots" id="memoryDots"></div>
+        <div class="memory-tap" id="memoryTap">
+          👆 Tap photo for next memory
+        </div>
+      </div>
+      <div class="memory-final" id="memoryFinal" style="display: none">
+        <div class="memory-final-emoji">💖</div>
+        <div class="memory-final-title">More Memories To Come...</div>
+        <div class="memory-final-text">
+          This is just the beginning of our story<br />✨ More photos & moments
+          to be added ✨
+        </div>
+      </div>
+      <button class="overlay-close" id="notesClose">Close</button>
+    </div>
 
-    const toast = document.getElementById("toast");
-    const toastBtn = document.getElementById("toastBtn");
+    <script>
+      // ========== LETTER CONTENT ==========
+      const LETTER = `I wrote this for one simple reason:
+Because you have become the most important part of my life.
 
-    const question = document.getElementById("question");
-    const btnRow = document.getElementById("btnRow");
-    const noBtn = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
+Distance may separate us sometimes, but you are always on my mind. Every plan I make, every dream I have — you're in it.
 
-    const celebrate = document.getElementById("celebrate");
-    const loveYou = document.getElementById("loveYou");
+I will always be your biggest supporter. Even if I only contribute 1% to your success, I'll be the proudest person in the world watching you shine.
 
-    const music = document.getElementById("music");
+We've had our storms. Moments that tested us, challenged us, and showed us what we're truly made of together. And you know what? We made it through. Every. Single. Time.
 
-    let toastShown = false;
-    let questionOpen = false;
-    let exploded = false;
+I know life won't always be sunshine and rainbows. But I know this for certain: whatever comes our way, we will face it together, and we will come out stronger on the other side.
 
-    let typingTimer = null;
-    let typingDone = false;         // ✅ NEW
-    let autoScrollTimer = null;     // ✅ NEW
-    let uTimer = null;
+I'm not perfect ("Yaaah 3aaad 3rftiha hhhhh"). I'll make mistakes, I'll stumble, I'll have my flaws. But loving you? Being with you? That will never be one of my regrets. It's the best decision I've ever made.
 
-    // ===== Auto-scroll helper =====
-    function startAutoScroll() {
-      stopAutoScroll();
-      // Smooth continuous auto-scroll while typing
-      autoScrollTimer = setInterval(() => {
-        paperBody.scrollTop = paperBody.scrollHeight;
-      }, 50);
-    }
+You make everything feel lighter.
+You make my heart feel fuller.
+You make me feel truly, deeply LOVED.
 
-    function stopAutoScroll() {
-      if (autoScrollTimer) {
-        clearInterval(autoScrollTimer);
-        autoScrollTimer = null;
-      }
-    }
+And for that, I am endlessly grateful...
+For your presence in my life,
+For the warmth you bring to my soul,
+For the way you love me,
+For everything you are, and everything we are together.
 
-    // ===== Show toast ONLY when typing is done =====
-    function maybeShowToastAfterTyping() {
-      if (toastShown || !typingDone) return;
+Happy Valentine's Day, my love. 💕`;
 
-      // Make sure we're at the bottom
-      paperBody.scrollTop = paperBody.scrollHeight;
+      // Photo memories - add your images to a 'photos' folder
+      // Each memory has: image filename, caption
+      const MEMORIES = [
+        { src: "1.jpg", caption: "Our first moment together ❤️" },
+        { src: "2.jpg", caption: "You make me so happy 😍" },
+        { src: "3.jpeg", caption: "My favorite person 💕" },
+        { src: "4.jpeg", caption: "I love your smile 😘" },
+        { src: "5.jpeg", caption: "My beautiful Marmuraa ✨" },
+        { src: "6.jpeg", caption: "Adventures with you 🌍" },
+        { src: "7.jpeg", caption: "Forever and always 💖" },
+        { src: "51.jpeg", caption: "You complete me 💫" },
+        // Add more photos here!
+      ];
 
-      // Slight delay feels nicer
-      setTimeout(() => {
-        if (toastShown || !typingDone) return;
-        toastShown = true;
-        toast.classList.add("show");
-      }, 450);
-    }
+      // ========== HELPERS ==========
+      const $ = (id) => document.getElementById(id);
+      const screens = document.querySelectorAll(".screen");
+      const progressDots = document.querySelectorAll(".progress-dot");
 
-    // ===== Typewriter =====
-    function startTyping() {
-      if (typingTimer) clearInterval(typingTimer);
+      // ========== PUZZLE GAME ==========
+      let puzzleTiles = [];
+      let emptyIndex = 8;
+      let moveCount = 0;
+      let puzzleTimer = 0;
+      let puzzleInterval = null;
+      let puzzleSolved = false;
 
-      typingDone = false;
-      letterText.textContent = "";
-      letterText.classList.add("typeCursor");
+      function initPuzzle() {
+        // Numbers 1-8, with one empty
+        puzzleTiles = [1, 2, 3, 4, 5, 6, 7, 8, null];
 
-      // ✅ Start auto-scroll while typing
-      startAutoScroll();
-
-      let i = 0;
-      typingTimer = setInterval(() => {
-        letterText.textContent += LETTER_CONTENT[i] || "";
-        i++;
-
-        if (i >= LETTER_CONTENT.length) {
-          clearInterval(typingTimer);
-          typingTimer = null;
-
-          typingDone = true;
-          letterText.classList.remove("typeCursor");
-
-          // ✅ Ensure we land at bottom
-          paperBody.scrollTop = paperBody.scrollHeight;
-
-          // ✅ Stop continuous auto-scroll once finished
-          stopAutoScroll();
-
-          // ✅ Now allow popup
-          maybeShowToastAfterTyping();
+        // Shuffle (make it solvable but not too hard)
+        for (let i = 0; i < 25; i++) {
+          const neighbors = getNeighbors(emptyIndex);
+          const randomNeighbor =
+            neighbors[Math.floor(Math.random() * neighbors.length)];
+          swapTiles(randomNeighbor, emptyIndex);
+          emptyIndex = randomNeighbor;
         }
-      }, TYPE_SPEED_MS);
-    }
 
-    // ===== Open letter reliably (mobile-first) =====
-    async function openLetter() {
-      envelope.classList.add("opened");
-      hint.textContent = "";
-
-      // start music safely
-      try { await music.play(); } catch(e) {}
-
-      // show letter after flap animation
-      setTimeout(() => {
-        letterOverlay.classList.add("show");
-        startTyping();
-      }, 520);
-
-      // fade envelope away so it doesn't interfere
-      envWrap.style.pointerEvents = "none";
-      envWrap.style.opacity = "0";
-      envWrap.style.transform = "translateY(18px) scale(0.98)";
-    }
-
-    // Use pointerdown (most reliable) + once
-    envWrap.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      openLetter();
-    }, { once: true });
-
-    // ✅ Keep scroll listener but block toast until typingDone
-    paperBody.addEventListener("scroll", () => {
-      if (!typingDone) return; // ✅ toast cannot appear before typing ends
-      const max = paperBody.scrollHeight - paperBody.clientHeight;
-      if (max <= 0) return;
-      const progress = (paperBody.scrollTop / max) * 100;
-      if (progress >= 88) {
-        maybeShowToastAfterTyping();
-      }
-    });
-
-    function openQuestion(){
-      toast.classList.remove("show");
-      question.classList.add("show");
-      questionOpen = true;
-
-      // initial NO position
-      const row = btnRow.getBoundingClientRect();
-      noBtn.style.left = (row.width * 0.65) + "px";
-      noBtn.style.top = "0px";
-      noBtn.style.transform = "translateX(-50%)";
-    }
-
-    toast.addEventListener("pointerdown", (e) => { e.preventDefault(); openQuestion(); });
-    toastBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); openQuestion(); });
-
-    // ===== NO follows pointer near the finger, but avoids click zone =====
-    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-
-    function placeNoNearPointer(clientX, clientY){
-      if(!questionOpen || exploded) return;
-
-      const row = btnRow.getBoundingClientRect();
-      const nb = noBtn.getBoundingClientRect();
-
-      const px = clientX - row.left;
-      const py = clientY - row.top;
-
-      let x = px + 34;
-      let y = py + 16;
-
-      const tooClose = Math.abs((x + nb.width/2) - px) < 60 && Math.abs((y + nb.height/2) - py) < 50;
-      if(tooClose){
-        x = px + (Math.random() > 0.5 ? 95 : -140);
-        y = py + (Math.random() > 0.5 ? 75 : -90);
+        moveCount = 0;
+        renderPuzzle();
+        startPuzzleTimer();
       }
 
-      x = clamp(x, 8, row.width - nb.width - 8);
-      y = clamp(y, 0, row.height - nb.height - 2);
+      function getNeighbors(index) {
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        const neighbors = [];
 
-      noBtn.style.left = x + "px";
-      noBtn.style.top = y + "px";
-      noBtn.style.transform = `translateX(0) rotate(${(Math.random()*8 - 4).toFixed(1)}deg)`;
-    }
+        if (row > 0) neighbors.push(index - 3);
+        if (row < 2) neighbors.push(index + 3);
+        if (col > 0) neighbors.push(index - 1);
+        if (col < 2) neighbors.push(index + 1);
 
-    btnRow.addEventListener("pointermove", (e) => {
-      placeNoNearPointer(e.clientX, e.clientY);
-    });
-
-    // ===== Explode NO + spawn 3 YES =====
-    function explodeAt(x, y){
-      for(let i=0;i<22;i++){
-        const p = document.createElement("div");
-        p.className = "particle";
-        const ang = Math.random() * Math.PI * 2;
-        const dist = Math.random()*120 + 30;
-        p.style.left = x + "px";
-        p.style.top = y + "px";
-        p.style.setProperty("--dx", Math.cos(ang) * dist + "px");
-        p.style.setProperty("--dy", Math.sin(ang) * dist + "px");
-        document.body.appendChild(p);
-        setTimeout(()=>p.remove(), 650);
+        return neighbors;
       }
-    }
 
-    function celebrateNow(){
-      question.classList.remove("show");
-      celebrate.classList.add("show");
-
-      if(uTimer) clearInterval(uTimer);
-      let uCount = 6;
-      uTimer = setInterval(() => {
-        uCount += 1;
-        if(uCount > 140) uCount = 10;
-        loveYou.textContent = "you" + "u".repeat(uCount);
-      }, 110);
-    }
-
-    function spawnYesButtons(){
-      const labels = ["YES 1", "YES 2", "YES 3"];
-      for(let i=0;i<3;i++){
-        const b = document.createElement("button");
-        b.className = "btnPill yes";
-        b.textContent = labels[i];
-        b.style.top = (56 + i*44) + "px";
-        b.style.left = (50 + (i===1 ? -16 : (i===2 ? 16 : 0))) + "%";
-        b.style.transform = "translateX(-50%)";
-        b.addEventListener("pointerdown", (e)=>{ e.preventDefault(); celebrateNow(); });
-        btnRow.appendChild(b);
+      function swapTiles(i1, i2) {
+        [puzzleTiles[i1], puzzleTiles[i2]] = [puzzleTiles[i2], puzzleTiles[i1]];
       }
-    }
 
-    function explodeNo(e){
-      if(exploded) return;
-      exploded = true;
-      e.preventDefault();
+      function renderPuzzle() {
+        const grid = $("puzzleGrid");
+        grid.innerHTML = "";
 
-      const r = noBtn.getBoundingClientRect();
-      explodeAt(r.left + r.width/2, r.top + r.height/2);
+        puzzleTiles.forEach((tile, index) => {
+          const div = document.createElement("div");
+          div.className = "puzzle-tile" + (tile === null ? " empty" : "");
+          div.textContent = tile || "";
+          div.dataset.index = index;
 
-      noBtn.style.opacity = "0";
-      noBtn.style.pointerEvents = "none";
+          // Check if in correct position
+          if (tile !== null && tile === index + 1) {
+            div.classList.add("correct");
+          }
 
-      spawnYesButtons();
-    }
+          div.addEventListener("click", () => handleTileClick(index));
+          grid.appendChild(div);
+        });
 
-    noBtn.addEventListener("pointerdown", explodeNo, { passive:false });
-    yesBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); celebrateNow(); });
+        $("moveCount").textContent = moveCount;
+      }
 
-  </script>
-</body>
+      function handleTileClick(index) {
+        if (puzzleSolved) return;
+
+        const neighbors = getNeighbors(emptyIndex);
+        if (neighbors.includes(index)) {
+          swapTiles(index, emptyIndex);
+          emptyIndex = index;
+          moveCount++;
+          renderPuzzle();
+
+          // Show hint after some moves
+          if (moveCount > 5) {
+            $("puzzleHint").classList.add("show");
+          }
+
+          // Check if solved
+          if (checkPuzzleSolved()) {
+            puzzleSolved = true;
+            clearInterval(puzzleInterval);
+            setTimeout(() => {
+              goToScreen(1);
+            }, 600);
+          }
+        }
+      }
+
+      function checkPuzzleSolved() {
+        for (let i = 0; i < 8; i++) {
+          if (puzzleTiles[i] !== i + 1) return false;
+        }
+        return true;
+      }
+
+      function startPuzzleTimer() {
+        puzzleInterval = setInterval(() => {
+          puzzleTimer++;
+          const mins = Math.floor(puzzleTimer / 60)
+            .toString()
+            .padStart(2, "0");
+          const secs = (puzzleTimer % 60).toString().padStart(2, "0");
+          $("puzzleTimer").textContent = `${mins}:${secs}`;
+        }, 1000);
+      }
+
+      // ========== NAVIGATION ==========
+      let currentScreen = 0;
+
+      function goToScreen(num) {
+        screens.forEach((s) => s.classList.remove("active"));
+        $(`screen${num}`).classList.add("active");
+
+        progressDots.forEach((dot, i) => {
+          dot.classList.remove("active", "completed");
+          if (i < num) dot.classList.add("completed");
+          if (i === num) dot.classList.add("active");
+        });
+
+        currentScreen = num;
+
+        // Show progress after puzzle
+        if (num >= 1) {
+          $("progress").classList.add("show");
+          $("bg").classList.add("love-mode");
+          $("particles").classList.add("show");
+          $("musicBtn").classList.add("show");
+        }
+
+        // Start letter typing
+        if (num === 2) {
+          startTyping();
+        }
+      }
+
+      // ========== PARTICLES ==========
+      function createParticles() {
+        const container = $("particles");
+        const emojis = ["💕", "✨", "💖", "💗", "🌸", "💝", "💋", "❤️"];
+
+        for (let i = 0; i < 18; i++) {
+          const p = document.createElement("div");
+          p.className = "particle";
+          p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          p.style.left = Math.random() * 100 + "%";
+          p.style.fontSize = 18 + Math.random() * 14 + "px";
+          p.style.animationDelay = Math.random() * 18 + "s";
+          p.style.animationDuration = 14 + Math.random() * 8 + "s";
+          container.appendChild(p);
+        }
+      }
+
+      // ========== SCREEN 1: REVEAL ==========
+      let envelopeOpened = false;
+
+      $("envelopeWrapper").addEventListener("click", () => {
+        if (envelopeOpened) return;
+        envelopeOpened = true;
+
+        const envelope = $("envelope");
+        const tapHint = $("tapHint");
+        const revealContent = $("revealContent");
+
+        // Open envelope
+        envelope.classList.add("opened");
+
+        // Hide tap hint
+        tapHint.style.opacity = "0";
+        tapHint.style.transform = "translateY(-10px)";
+
+        // Show content after envelope animation
+        setTimeout(() => {
+          revealContent.classList.add("show");
+          playMusic();
+        }, 800);
+      });
+
+      $("revealContinueBtn").addEventListener("click", () => {
+        goToScreen(2);
+      });
+
+      // ========== SCREEN 2: LETTER ==========
+      let typingIndex = 0;
+      let typingTimer = null;
+
+      function startTyping() {
+        const textEl = $("letterText");
+        const cursor = $("cursor");
+        const letterBody = $("letterBody");
+
+        textEl.textContent = "";
+        typingIndex = 0;
+
+        typingTimer = setInterval(() => {
+          if (typingIndex < LETTER.length) {
+            textEl.textContent += LETTER[typingIndex];
+            typingIndex++;
+            letterBody.scrollTop = letterBody.scrollHeight;
+          } else {
+            clearInterval(typingTimer);
+            cursor.style.display = "none";
+            $("signature").classList.add("show");
+
+            setTimeout(() => {
+              $("continueBtn").classList.add("show");
+            }, 700);
+          }
+        }, 40);
+      }
+
+      $("continueBtn").addEventListener("click", () => {
+        goToScreen(3);
+      });
+
+      // ========== SCREEN 3: QUESTION ==========
+      const noBtn = $("noBtn");
+      const btnRow = $("btnRow");
+      let noAttempts = 0;
+      const noMessages = [
+        "Really?",
+        "Are you sure?",
+        "Think again...",
+        "Please? 🥺",
+        "Pretty please?",
+        "💔",
+        "I'll cry",
+        "Ok fine...",
+      ];
+
+      function moveNoButton() {
+        if (noAttempts >= noMessages.length) {
+          noBtn.style.opacity = "0";
+          noBtn.style.pointerEvents = "none";
+          return;
+        }
+
+        const rowRect = btnRow.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+
+        const maxX = rowRect.width - btnRect.width;
+        const maxY = rowRect.height - btnRect.height;
+
+        noBtn.style.left = Math.random() * maxX + "px";
+        noBtn.style.top = Math.random() * maxY + "px";
+        noBtn.textContent = noMessages[noAttempts];
+        noAttempts++;
+      }
+
+      noBtn.addEventListener("pointerenter", moveNoButton);
+      noBtn.addEventListener(
+        "touchstart",
+        (e) => {
+          e.preventDefault();
+          moveNoButton();
+        },
+        { passive: false },
+      );
+
+      $("yesBtn").addEventListener("click", () => {
+        goToScreen(4);
+        celebrate();
+      });
+
+      // ========== SCREEN 4: CELEBRATION ==========
+      function celebrate() {
+        // Confetti burst
+        for (let i = 0; i < 60; i++) {
+          setTimeout(() => createConfetti(), i * 40);
+        }
+
+        // Show surprises panel
+        setTimeout(() => {
+          $("surprisesPanel").classList.add("show");
+        }, 1800);
+
+        // Rotate phrases
+        const loveSub = $("loveSub");
+        const phrases = [
+          "More than words can say",
+          "To infinity and beyond",
+          "Forever and always",
+          "With every beat of my heart",
+          "Until the stars burn out",
+        ];
+        let phraseIndex = 0;
+
+        setInterval(() => {
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          loveSub.style.opacity = "0";
+          setTimeout(() => {
+            loveSub.textContent = phrases[phraseIndex];
+            loveSub.style.opacity = "1";
+          }, 300);
+        }, 3500);
+      }
+
+      function createConfetti() {
+        const colors = [
+          "#ff6b9d",
+          "#c56cf0",
+          "#ffd700",
+          "#ff4081",
+          "#fff",
+          "#ff8fb8",
+        ];
+        const shapes = ["circle", "rect", "heart"];
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.top = "-20px";
+
+        if (shape === "heart") {
+          confetti.textContent = "❤️";
+          confetti.style.fontSize = 10 + Math.random() * 10 + "px";
+        } else {
+          confetti.style.background =
+            colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = 6 + Math.random() * 8 + "px";
+          confetti.style.height = 6 + Math.random() * 8 + "px";
+          confetti.style.borderRadius = shape === "circle" ? "50%" : "2px";
+        }
+
+        confetti.style.animationDuration = 2.5 + Math.random() * 1.5 + "s";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+      }
+
+      // ========== MUSIC ==========
+      const music = $("music");
+      const musicBtn = $("musicBtn");
+      let isMusicPlaying = false;
+
+      function playMusic() {
+        music
+          .play()
+          .then(() => {
+            isMusicPlaying = true;
+            musicBtn.textContent = "🔊";
+            musicBtn.classList.add("playing");
+          })
+          .catch(() => {});
+      }
+
+      musicBtn.addEventListener("click", () => {
+        if (isMusicPlaying) {
+          music.pause();
+          isMusicPlaying = false;
+          musicBtn.textContent = "🔇";
+          musicBtn.classList.remove("playing");
+        } else {
+          playMusic();
+        }
+      });
+
+      // ========== SURPRISES ==========
+
+      // Hug
+      let hugInterval = null;
+      let hugProgress = 0;
+
+      $("hugSurprise").addEventListener("click", () => {
+        $("hugOverlay").classList.add("show");
+        hugProgress = 0;
+        $("hugMeter").style.width = "0%";
+        $("hugEmoji").textContent = "🤗";
+        $("hugEmoji").style.transform = "scale(1)";
+        $("hugText").textContent = "Hold the screen to hug me...";
+      });
+
+      function startHug() {
+        hugInterval = setInterval(() => {
+          hugProgress = Math.min(100, hugProgress + 1.8);
+          $("hugMeter").style.width = hugProgress + "%";
+
+          const emoji = $("hugEmoji");
+          const text = $("hugText");
+
+          if (hugProgress < 25) {
+            text.textContent = "A gentle hug...";
+            emoji.style.transform = "scale(1.08)";
+          } else if (hugProgress < 50) {
+            text.textContent = "Pulling you closer...";
+            emoji.style.transform = "scale(1.16)";
+          } else if (hugProgress < 75) {
+            text.textContent = "Holding you tight...";
+            emoji.style.transform = "scale(1.24)";
+          } else if (hugProgress < 95) {
+            text.textContent = "Never letting go...";
+            emoji.style.transform = "scale(1.32)";
+            emoji.textContent = "🥰";
+          } else {
+            text.textContent = "I love you so much... 💕";
+            emoji.style.transform = "scale(1.4)";
+            emoji.textContent = "😘";
+          }
+        }, 45);
+      }
+
+      function stopHug() {
+        clearInterval(hugInterval);
+        $("hugEmoji").style.transform = "scale(1)";
+      }
+
+      $("hugOverlay").addEventListener("touchstart", (e) => {
+        if (e.target.id === "hugClose") return;
+        startHug();
+      });
+      $("hugOverlay").addEventListener("touchend", stopHug);
+      $("hugOverlay").addEventListener("mousedown", (e) => {
+        if (e.target.id === "hugClose") return;
+        startHug();
+      });
+      $("hugOverlay").addEventListener("mouseup", stopHug);
+      $("hugOverlay").addEventListener("mouseleave", stopHug);
+
+      $("hugClose").addEventListener("click", () => {
+        stopHug();
+        $("hugOverlay").classList.remove("show");
+      });
+
+      // Kiss Attack Game
+      let kissScore = 0;
+      let kissCombo = 0;
+      let lastKissTime = 0;
+      const faces = ["😚", "😘", "🥰", "😍", "💋", "😏"];
+      const comboTexts = [
+        "Nice!",
+        "Sweet!",
+        "Amazing!",
+        "On Fire! 🔥",
+        "LEGENDARY! 💖",
+      ];
+
+      $("kissSurprise").addEventListener("click", () => {
+        $("kissOverlay").classList.add("show");
+        kissScore = 0;
+        kissCombo = 0;
+        $("kissScore").textContent = "0";
+        $("kissCombo").classList.remove("show");
+        $("kissFace").textContent = "😚";
+      });
+
+      $("kissTarget").addEventListener("click", (e) => {
+        e.stopPropagation();
+        const now = Date.now();
+        const target = $("kissTarget");
+        const face = $("kissFace");
+        const combo = $("kissCombo");
+
+        // Add score
+        kissScore++;
+        $("kissScore").textContent = kissScore;
+
+        // Combo system
+        if (now - lastKissTime < 500) {
+          kissCombo = Math.min(kissCombo + 1, 20);
+        } else {
+          kissCombo = 1;
+        }
+        lastKissTime = now;
+
+        // Show combo text
+        if (kissCombo >= 3) {
+          const comboIdx = Math.min(
+            Math.floor((kissCombo - 3) / 3),
+            comboTexts.length - 1,
+          );
+          combo.textContent = comboTexts[comboIdx] + " x" + kissCombo;
+          combo.classList.add("show");
+          setTimeout(() => combo.classList.remove("show"), 400);
+        }
+
+        // Animate target
+        target.classList.remove("kissed");
+        void target.offsetWidth;
+        target.classList.add("kissed");
+
+        // Change face randomly
+        face.textContent = faces[Math.floor(Math.random() * faces.length)];
+
+        // Create flying kiss
+        const flyingKiss = document.createElement("div");
+        flyingKiss.className = "kiss-flying";
+        flyingKiss.textContent = "💋";
+        flyingKiss.style.left = e.clientX + "px";
+        flyingKiss.style.top = e.clientY + "px";
+        document.body.appendChild(flyingKiss);
+        setTimeout(() => flyingKiss.remove(), 800);
+
+        // Create burst effect
+        for (let i = 0; i < 6; i++) {
+          const burst = document.createElement("div");
+          burst.className = "kiss-burst";
+          burst.textContent = ["💕", "💗", "💖", "✨", "💋", "❤️"][i];
+          const angle = (i / 6) * Math.PI * 2;
+          const dist = 60 + Math.random() * 30;
+          burst.style.setProperty("--tx", Math.cos(angle) * dist + "px");
+          burst.style.setProperty("--ty", Math.sin(angle) * dist + "px");
+          target.appendChild(burst);
+          setTimeout(() => burst.remove(), 600);
+        }
+
+        // Milestone celebrations
+        if (kissScore === 50 || kissScore === 100) {
+          for (let i = 0; i < 20; i++) {
+            setTimeout(() => createConfetti(), i * 30);
+          }
+        }
+      });
+
+      $("kissClose").addEventListener("click", () => {
+        $("kissOverlay").classList.remove("show");
+      });
+
+      // Photo Memories Gallery
+      let currentMemoryIndex = 0;
+      let memoriesViewed = [];
+
+      function createMemoryDots() {
+        const dotsContainer = $("memoryDots");
+        dotsContainer.innerHTML = "";
+        MEMORIES.forEach((_, idx) => {
+          const dot = document.createElement("div");
+          dot.className = "memory-dot" + (idx === 0 ? " active" : "");
+          dotsContainer.appendChild(dot);
+        });
+      }
+
+      function updateMemoryDots() {
+        const dots = document.querySelectorAll(".memory-dot");
+        dots.forEach((dot, idx) => {
+          dot.classList.remove("active");
+          if (idx === currentMemoryIndex) {
+            dot.classList.add("active");
+          }
+          if (memoriesViewed.includes(idx)) {
+            dot.classList.add("viewed");
+          }
+        });
+      }
+
+      function showMemory(index) {
+        if (index >= MEMORIES.length) {
+          // Show final message
+          $("memoriesGallery").style.display = "none";
+          $("memoryFinal").style.display = "block";
+          return;
+        }
+
+        const memory = MEMORIES[index];
+        const img = $("memoryImage");
+        const caption = $("memoryCaption");
+        const placeholder = $("memoryPlaceholder");
+        const frame = $("memoryFrame");
+
+        // Reset state
+        img.classList.remove("loaded");
+        placeholder.style.display = "flex";
+        caption.textContent = "";
+
+        // Animate frame
+        frame.style.animation = "none";
+        frame.offsetHeight;
+        frame.style.animation = "memoryAppear 0.5s ease-out";
+
+        // Load image
+        img.onload = () => {
+          img.classList.add("loaded");
+          placeholder.style.display = "none";
+          caption.textContent = memory.caption;
+        };
+
+        img.onerror = () => {
+          placeholder.innerHTML = `<span>🖼️</span><span class="memory-placeholder-text">Photo ${index + 1}</span>`;
+          caption.textContent = memory.caption;
+        };
+
+        img.src = memory.src;
+
+        // Track viewed
+        if (!memoriesViewed.includes(index)) {
+          memoriesViewed.push(index);
+        }
+
+        updateMemoryDots();
+
+        // Update tap hint
+        if (index === MEMORIES.length - 1) {
+          $("memoryTap").textContent = "👆 Tap for a special message";
+        } else {
+          $("memoryTap").textContent = "👆 Tap photo for next memory";
+        }
+      }
+
+      // Add animation for memory frame
+      const memoryStyle = document.createElement("style");
+      memoryStyle.textContent = `
+        @keyframes memoryAppear {
+          from { transform: scale(0.9) rotate(-2deg); opacity: 0; }
+          to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(memoryStyle);
+
+      $("notesSurprise").addEventListener("click", () => {
+        $("notesOverlay").classList.add("show");
+        currentMemoryIndex = 0;
+        memoriesViewed = [];
+        $("memoriesGallery").style.display = "flex";
+        $("memoryFinal").style.display = "none";
+        createMemoryDots();
+        showMemory(0);
+      });
+
+      $("memoryFrame").addEventListener("click", () => {
+        currentMemoryIndex++;
+        showMemory(currentMemoryIndex);
+      });
+
+      $("memoryFinal").addEventListener("click", () => {
+        // Restart gallery
+        currentMemoryIndex = 0;
+        $("memoriesGallery").style.display = "flex";
+        $("memoryFinal").style.display = "none";
+        showMemory(0);
+      });
+
+      $("notesClose").addEventListener("click", () => {
+        $("notesOverlay").classList.remove("show");
+      });
+
+      // ========== INIT ==========
+      createParticles();
+      initPuzzle();
+    </script>
+  </body>
 </html>
